@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>22CSR051_AD</title>
+    <style>
+        body {
+            background-image: url('https://wallpapercave.com/wp/wp2870962.jpg');
+            background-repeat: scroll;
+            background-size: 100%;
+            font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+        }
+        .btn-primary {
+            background-color: rgb(255, 255, 255);
+        }
+        .container {
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 40px;
+            background-color: #ffffff;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CGPA Calculator</h1>
+        <div class="form-group">
+            Number of Semesters:
+            <input type="number" class="form-control" id="numPrevSemesters" min="1" required onfocus="highlight(this)" onblur="unhighlight(this)">
+            <br><br>
+            <button class="btn btn-primary mt-2" onclick="addPrevSemesters()" onmouseover="hoverButton(this)" onmouseout="unhoverButton(this)">Add Semesters</button>
+        </div>
+        <div id="prevSemesters"></div>
+    </div>
+
+    <script>
+        function addPrevSemesters() {
+            var numPrevSemesters = parseInt(document.getElementById("numPrevSemesters").value);
+            var prevSemestersDiv = document.getElementById("prevSemesters");
+            prevSemestersDiv.innerHTML = "";
+            for (var i = 1; i <= numPrevSemesters; i++) {
+                var semesterDiv = document.createElement("div");
+                semesterDiv.innerHTML = `<h3>Semester ${i}:</h3>
+                    <div>
+                        Number of Courses:
+                        <input type="number" id="numCoursesPrevSemester${i}" min="1">
+                        <br><br>
+                        <button class="btn-primary" onclick="addCoursesPrevSemester(${i})" onmouseover="hoverButton(this)" onmouseout="unhoverButton(this)">Add Course</button>
+                    </div>
+                    <div id="coursesPrevSemester${i}"></div>
+                    <div id="resultPrevSemester${i}"></div>`;
+                prevSemestersDiv.appendChild(semesterDiv);
+            }
+        }
+
+        function addCoursesPrevSemester(semesterIndex) {
+            var numCourses = parseInt(document.getElementById("numCoursesPrevSemester" + semesterIndex).value);
+            var coursesDiv = document.getElementById("coursesPrevSemester" + semesterIndex);
+            coursesDiv.innerHTML = "";
+            for (var i = 1; i <= numCourses; i++) {
+                var courseDiv = document.createElement("div");
+                courseDiv.innerHTML = `<h4>Course ${i}</h4>
+                        Name of Course:
+                        <input type="text" id="name">
+                    <label for="creditPrevSemester${semesterIndex}_${i}">Credit:</label>
+                    <input type="number" id="creditPrevSemester${semesterIndex}_${i}" min="1">
+                    <label for="gradePrevSemester${semesterIndex}_${i}">Grade:</label>
+                    <select id="gradePrevSemester${semesterIndex}_${i}" onfocus="highlight(this)" onblur="unhighlight(this)">
+                        <option value="10">O</option>
+                        <option value="9.0">A+</option>
+                        <option value="8.0">A</option>
+                        <option value="7.0">B+</option>
+                        <option value="6.0">B</option>
+                        <option value="5.0">C</option>
+                        <option value="0">U</option>
+                    </select>`;
+                coursesDiv.appendChild(courseDiv);
+            }
+            var calculateButton = document.createElement("button");
+            calculateButton.textContent = "Calculate GPA";
+            calculateButton.onclick = function () {
+                calculateGPA(semesterIndex);
+            };
+            coursesDiv.appendChild(calculateButton);
+        }
+
+        function calculateGPA(semesterIndex) {
+            var numCoursesPrevSemester = parseInt(document.getElementById("numCoursesPrevSemester" + semesterIndex).value);
+            var totalCredits = 0;
+            var totalGradePoints = 0;
+            var containsU = false;
+            for (var i = 1; i <= numCoursesPrevSemester; i++) {
+                var credit = parseInt(document.getElementById(`creditPrevSemester${semesterIndex}_${i}`).value);
+                var grade = parseFloat(document.getElementById(`gradePrevSemester${semesterIndex}_${i}`).value);
+                totalCredits += credit;
+                totalGradePoints += credit * grade;
+                if (grade === 0) {
+                    containsU = true;
+                }
+            }
+            if (containsU) {
+                window.alert("CGPA is not calculated as the student failed in the subject");
+                return;
+            }
+            var semesterGPA = totalGradePoints / totalCredits;
+            var resultDiv = document.getElementById("resultPrevSemester" + semesterIndex);
+            resultDiv.innerHTML = `<h4>Semester ${semesterIndex} GPA is : ${semesterGPA.toFixed(2)}</h4>`;
+            var cumulativeCredits = 0;
+            var cumulativeGradePoints = 0;
+            for (var j = 1; j <= semesterIndex; j++) {
+                var semesterCredits = parseInt(document.getElementById(`numCoursesPrevSemester${j}`).value);
+                var semesterGPA = parseFloat(document.getElementById(`resultPrevSemester${j}`).querySelector('h4').textContent.split(": ")[1]);
+                cumulativeCredits += semesterCredits;
+                cumulativeGradePoints += semesterGPA * semesterCredits;
+            }
+            var cumulativeCGPA = cumulativeGradePoints / cumulativeCredits;
+            resultDiv.innerHTML += `<h4>Your CGPA is : ${semesterIndex}: ${cumulativeCGPA.toFixed(2)}</h4>`;
+        }
+
+        function highlight(element) {
+            element.style.border = "2px solid blue";
+        }
+
+        function unhighlight(element) {
+            element.style.border = "";
+        }
+
+        function hoverButton(element) {
+            element.style.backgroundColor = "lightgray";
+        }
+
+        function unhoverButton(element) {
+            element.style.backgroundColor = "";
+        }
+    </script>
+</body>
+</html>
